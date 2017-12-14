@@ -25,3 +25,5 @@
 #item02 { background-color: aliceblue; }
 #item03 { background-color: bisque; }
 #item04 { background-color: aquamarine; }
+
+#test { width: 70px; height: 70px; background-color: blueviolet; border-radius: 50px; margin-top: 20px; }
