@@ -1,3 +1,5 @@
+//Функция-конструктор Numbers с методом solve (управляет всем) и двумя вспомогательными методами showLine и showArrow, которые отвечают за визуальное представление числа на линейке: одна показывает линии, так что линейка становится похожа на градусник (сделала, чтобы было хоть какое-то представление, поскольку со второй возникла проблема); вторая показывает выгнутые стрелки, как в ТЗ (через HTML5 canvas), однако я пока не смогла понять, что там именно не так со вторым отрезком - завтра посмотрю "свежим взглядом" и обновлю код на гитхабе (общую мысль метод, тем не менее, передает).
+
 function Numbers() {
     let arrone = [6, 7, 8, 9], arrtwo = [11, 12, 13, 14];
     this.a = arrone[Math.floor(Math.random() * 4)];
@@ -18,7 +20,10 @@ Numbers.prototype.solve = function(number, span) {
     let aim, form = document.createElement('span');
     form.innerHTML = '<form><input name="inputfornumbers" maxlength="2" type="text" /></form>';
 
-    if (Numbers.count == 0 || Numbers.count == 1) { this.showLine(number).prepend(form); aim = form; }
+    if (Numbers.count == 0 || Numbers.count == 1) {
+        this.showLine(number).prepend(form);
+        //this.showArrow(number).prepend(form); - это линейка по ТЗ (с выгнутыми стрелками) через canvas-элемент
+        aim = form; }
     else { span.style.display = 'inline-block'; span.innerHTML = ''; span.appendChild(form); aim = span; };
 
     form.onchange = (event = event || window.event) => {
@@ -35,30 +40,6 @@ Numbers.prototype.solve = function(number, span) {
     };
 
 };
-
-/*Numbers.prototype.test = function() {
-    var rect = document.createElement('div');
-    rect.style.width = 39 * this.b + 'px';
-    rect.style.height = '20px';
-    rect.style.backgroundColor = 'green';
-    rect.style.position = 'absolute';
-    rect.style.top = '0px';
-    rect.style.left = '0px';
-    document.getElementsByClassName('main')[0].appendChild(rect);
-
-    var coords = document.getElementById('ruler').getBoundingClientRect();
-    rect.style.top = coords.top + 'px';
-    rect.style.left = coords.left + 35 + 39*this.a + 'px';
-
-    var startpoint = coords.left + 35 + 'px';
-    var endpoint = coords.right - 60 + 'px';
-    var segmentlength = 39;
-    var divwidthforA = segmentlength * this.a + 'px';
-    var startpointforB = coords.left + 35 + segmentlength * this.a + 'px';
-    var divwidthforB = segmentlength * this.b + 'px';
-
-
-};*/
 
 Numbers.prototype.showLine = function(segment) {
     let inputdiv = document.createElement('div'), rect = document.createElement('div'),
@@ -81,28 +62,46 @@ Numbers.prototype.showLine = function(segment) {
     return inputdiv;
 };
 
-/*Numbers.prototype.showArrow = function(amountofsegments) {
-    var canvasdiv = document.createElement('div');
-    var canvas = document.createElement('canvas');
-    var coords = document.getElementById('ruler').getBoundingClientRect();
+Numbers.prototype.showArrow = function(segment) {
+
+    var canvasdiv = document.createElement('div'), canvas = document.createElement('canvas'), coords = document.getElementById('ruler').getBoundingClientRect(), coordsdiv;
+
     canvasdiv.style.position = 'absolute';
+    canvasdiv.classList.add('t');
+
+    canvasdiv.style.height = canvas.style.height = '83px';
+    canvasdiv.style.width = canvas.style.width = 39 * segment + 'px';
     canvasdiv.style.top = coords.top + 'px';
     canvasdiv.style.left = coords.left + 35 + 'px';
-    canvasdiv.style.width = canvas.style.width = 39 * this.a + 'px';
-    canvasdiv.style.height = canvas.style.height = '83px';
     canvasdiv.appendChild(canvas);
-    document.getElementsByClassName('main')[0].appendChild(canvasdiv);
+    document.getElementsByClassName('main')[0].appendChild(canvasdiv)
 
     const drawing = document.getElementsByTagName('canvas')[0].getContext('2d');
 
-    drawing.strokeStyle = '#EF3038';
-    drawing.lineWidth = '0.7';
-    drawing.beginPath();
-    if (Numbers.count == 0) { drawing.moveTo(0, 100); drawing.quadraticCurveTo(39 * this.a / 2, 0, 39 * this.a, 100);  };
-    //if (Numbers.count == 1) { drawing.moveTo(13 * ++this.a, 100); drawing.quadraticCurveTo(13 * 100 / 2, -20, 13 * ++this.c, 100); };
-    drawing.stroke();
+    switch (Numbers.count) {
+        case 0:
+            coordsdiv = document.getElementsByClassName('t')[0].getBoundingClientRect();
+            drawing.strokeStyle = '#EF3038';
+            drawing.lineWidth = '0.7';
+            drawing.beginPath();
+            drawing.moveTo(0, 100);
+            drawing.quadraticCurveTo(39 * this.a / 2, 0, coords.left + coordsdiv.bottom, 100);
+            drawing.stroke();
+            break;
+        case 1:
+            coordsdiv = document.getElementsByClassName('t')[1].getBoundingClientRect();
+            drawing.strokeStyle = '#007FFF';
+            drawing.lineWidth = '0.7';
+            drawing.beginPath();
+            drawing.moveTo(coords.left + 35 + 39 * this.a, 100);
+            drawing.quadraticCurveTo(39 * this.a / 2, 0, coords.left + 35 + 39 * this.c, 100);
+            drawing.stroke();
+            canvasdiv.style.left = coords.left + coords.left + coordsdiv.bottom + 'px';
+            break;
+    };
 
     return canvasdiv;
-};*/
+
+};
 
 new Numbers();
