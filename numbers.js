@@ -1,14 +1,9 @@
-/*Функция-конструктор Numbers с методом solve (управляет всем) и двумя вспомогательными методами showLine и showArrow, которые отвечают за
-визуальное представление числа на линейке: одна показывает линии, так что линейка становится похожа на градусник (сделала, чтобы было хоть
-какое-то представление, поскольку со второй возникла проблема); вторая показывает выгнутые стрелки, как в ТЗ (через HTML5 canvas), однако я пока
-не смогла понять, что там именно не так со вторым отрезком - завтра посмотрю "свежим взглядом" и обновлю код на гитхабе (общую мысль метод, тем
-не менее, передает).*/
-
-function Numbers() {
+function Numbers(style = 'line' || 'convex') {
     let arrone = [6, 7, 8, 9], arrtwo = [11, 12, 13, 14];
     this.a = arrone[Math.floor(Math.random() * 4)];
     this.c = arrtwo[Math.floor(Math.random() * 4)];
     this.b = this.c - this.a;
+    this.style = style;
 
     this.anumber = document.getElementById('anumber'); this.anumber.innerHTML = this.a;
     this.bnumber = document.getElementById('bnumber'); this.bnumber.innerHTML = this.b;
@@ -25,9 +20,7 @@ Numbers.prototype.solve = function(number, span) {
     form.innerHTML = '<form><input name="inputfornumbers" maxlength="2" type="text" /></form>';
 
     if (Numbers.count == 0 || Numbers.count == 1) {
-        //this.showLine(number).prepend(form);
-        this.showArrow(number).prepend(form);
-        aim = form; }
+        this.style == 'line' ? this.showLine(number).prepend(form) : this.showConvex(number).prepend(form); aim = form; }
     else { span.style.display = 'inline-block'; span.innerHTML = ''; span.appendChild(form); aim = span; };
 
     form.onchange = (event = event || window.event) => {
@@ -46,27 +39,27 @@ Numbers.prototype.solve = function(number, span) {
 };
 
 Numbers.prototype.showLine = function(segment) {
-    let inputdiv = document.createElement('div'), rect = document.createElement('div'),
+    let idiv = document.createElement('div'), rect = document.createElement('div'),
         ruler = document.getElementById('ruler').getBoundingClientRect();
 
-    inputdiv.style.position = 'absolute';
-    inputdiv.style.textAlign = 'center';
-    inputdiv.style.fontSize = '17pt';
+    idiv.style.position = 'absolute';
+    idiv.style.textAlign = 'center';
+    idiv.style.fontSize = '20pt';
     rect.style.height = '3px';
     rect.style.marginTop = '20px';
-    rect.style.width = inputdiv.style.width = 39 * segment + 'px';
+    rect.style.width = idiv.style.width = 39 * segment + 'px';
 
-    inputdiv.appendChild(rect);
-    document.querySelector('.main').appendChild(inputdiv);
+    idiv.appendChild(rect);
+    document.querySelector('.main').appendChild(idiv);
 
-    inputdiv.style.top = ruler.top - 20 + 'px';
-    if (Numbers.count == 0) { rect.style.backgroundColor = '#EF3038'; inputdiv.style.left = ruler.left + 35 + 'px'; }
-    else { rect.style.backgroundColor = '#007FFF'; inputdiv.style.left = ruler.left + 35 + 39 * this.a + 'px'; };
+    idiv.style.top = ruler.top - 30 + 'px';
+    if (Numbers.count == 0) { rect.style.backgroundColor = '#EF3038'; idiv.style.left = ruler.left + 35 + 'px'; }
+    else { rect.style.backgroundColor = '#007FFF'; idiv.style.left = ruler.left + 35 + 39 * this.a + 'px'; };
 
-    return inputdiv;
+    return idiv;
 };
 
-Numbers.prototype.showArrow = function(segment) {
+Numbers.prototype.showConvex = function(segment) {
 
     let coords, drawing, cdiv = document.createElement('div'), canvas = document.createElement('canvas'),
         ruler = document.getElementById('ruler').getBoundingClientRect();
@@ -74,10 +67,11 @@ Numbers.prototype.showArrow = function(segment) {
     cdiv.style.position = 'absolute';
     cdiv.classList.add('arrow');
 
-    cdiv.style.height = canvas.style.height = '83px';
+    canvas.style.height = '80px';
     cdiv.style.width = canvas.style.width = 39 * segment + 'px';
-    cdiv.style.top = ruler.top + 'px';
-    cdiv.style.left = ruler.left + 35 + 'px';
+    cdiv.style.top = cdiv.style.left = 0 + 'px';
+    cdiv.style.textAlign = 'center';
+    cdiv.style.fontSize = '20pt';
     cdiv.appendChild(canvas);
     document.querySelector('.main').appendChild(cdiv);
 
@@ -86,6 +80,7 @@ Numbers.prototype.showArrow = function(segment) {
             drawing = document.getElementsByTagName('canvas')[0].getContext('2d');
             coords = document.querySelectorAll('.arrow')[0].getBoundingClientRect();
             draw();
+            cdiv.style.left = ruler.left + 35 + 'px';
             break;
         case 1:
             drawing = document.getElementsByTagName('canvas')[1].getContext('2d');
@@ -97,15 +92,17 @@ Numbers.prototype.showArrow = function(segment) {
 
     function draw() {
             drawing.strokeStyle = '#EF3038';
-            drawing.lineWidth = '1.5';
+            drawing.lineWidth = '4.5';
+            drawing.lineCap = 'round';
             drawing.beginPath();
-            drawing.moveTo(0, 100);
-            drawing.quadraticCurveTo(39 * segment / 2, 0, ruler.left + coords.bottom, 100);
+            drawing.moveTo(coords.left, coords.bottom);
+            drawing.quadraticCurveTo(300 / 2, -30, 300, coords.bottom);
             drawing.stroke();
+            cdiv.style.top = ruler.top - 70 + 'px';
     };
 
     return cdiv;
 
 };
 
-new Numbers();
+new Numbers('line');
