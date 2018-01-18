@@ -25,13 +25,13 @@ Numbers.prototype.solve = function(number, span) {
     form.innerHTML = '<form><input name="inputfornumbers" maxlength="2" type="text" /></form>';
 
     if (Numbers.count == 0 || Numbers.count == 1) {
-        this.showLine(number).prepend(form);
-        //this.showArrow(number).prepend(form); - это линейка по ТЗ (с выгнутыми стрелками) через canvas-элемент
+        //this.showLine(number).prepend(form);
+        this.showArrow(number).prepend(form);
         aim = form; }
     else { span.style.display = 'inline-block'; span.innerHTML = ''; span.appendChild(form); aim = span; };
 
     form.onchange = (event = event || window.event) => {
-        if (event.target.value != number) { event.target.style.color = 'red'; span.style.backgroundColor = 'yellow'; }
+        if (event.target.value != number) { event.target.style.color = 'red'; span.style.backgroundColor = '#FFD700'; }
         else {
             span.style.backgroundColor = 'white';
             event.target.style.color = 'black';
@@ -47,7 +47,7 @@ Numbers.prototype.solve = function(number, span) {
 
 Numbers.prototype.showLine = function(segment) {
     let inputdiv = document.createElement('div'), rect = document.createElement('div'),
-        coords = document.getElementById('ruler').getBoundingClientRect();
+        ruler = document.getElementById('ruler').getBoundingClientRect();
 
     inputdiv.style.position = 'absolute';
     inputdiv.style.textAlign = 'center';
@@ -57,54 +57,54 @@ Numbers.prototype.showLine = function(segment) {
     rect.style.width = inputdiv.style.width = 39 * segment + 'px';
 
     inputdiv.appendChild(rect);
-    document.getElementsByClassName('main')[0].appendChild(inputdiv);
+    document.querySelector('.main').appendChild(inputdiv);
 
-    inputdiv.style.top = coords.top - 20 + 'px';
-    if (Numbers.count == 0) { rect.style.backgroundColor = '#EF3038'; inputdiv.style.left = coords.left + 35 + 'px'; }
-    else { rect.style.backgroundColor = '#007FFF'; inputdiv.style.left = coords.left + 35 + 39 * this.a + 'px'; };
+    inputdiv.style.top = ruler.top - 20 + 'px';
+    if (Numbers.count == 0) { rect.style.backgroundColor = '#EF3038'; inputdiv.style.left = ruler.left + 35 + 'px'; }
+    else { rect.style.backgroundColor = '#007FFF'; inputdiv.style.left = ruler.left + 35 + 39 * this.a + 'px'; };
 
     return inputdiv;
 };
 
 Numbers.prototype.showArrow = function(segment) {
 
-    var canvasdiv = document.createElement('div'), canvas = document.createElement('canvas'), coords = document.getElementById('ruler').getBoundingClientRect(), coordsdiv;
+    let coords, drawing, cdiv = document.createElement('div'), canvas = document.createElement('canvas'),
+        ruler = document.getElementById('ruler').getBoundingClientRect();
 
-    canvasdiv.style.position = 'absolute';
-    canvasdiv.classList.add('t');
+    cdiv.style.position = 'absolute';
+    cdiv.classList.add('arrow');
 
-    canvasdiv.style.height = canvas.style.height = '83px';
-    canvasdiv.style.width = canvas.style.width = 39 * segment + 'px';
-    canvasdiv.style.top = coords.top + 'px';
-    canvasdiv.style.left = coords.left + 35 + 'px';
-    canvasdiv.appendChild(canvas);
-    document.getElementsByClassName('main')[0].appendChild(canvasdiv)
-
-    const drawing = document.getElementsByTagName('canvas')[0].getContext('2d');
+    cdiv.style.height = canvas.style.height = '83px';
+    cdiv.style.width = canvas.style.width = 39 * segment + 'px';
+    cdiv.style.top = ruler.top + 'px';
+    cdiv.style.left = ruler.left + 35 + 'px';
+    cdiv.appendChild(canvas);
+    document.querySelector('.main').appendChild(cdiv);
 
     switch (Numbers.count) {
         case 0:
-            coordsdiv = document.getElementsByClassName('t')[0].getBoundingClientRect();
-            drawing.strokeStyle = '#EF3038';
-            drawing.lineWidth = '0.7';
-            drawing.beginPath();
-            drawing.moveTo(0, 100);
-            drawing.quadraticCurveTo(39 * this.a / 2, 0, coords.left + coordsdiv.bottom, 100);
-            drawing.stroke();
+            drawing = document.getElementsByTagName('canvas')[0].getContext('2d');
+            coords = document.querySelectorAll('.arrow')[0].getBoundingClientRect();
+            draw();
             break;
         case 1:
-            coordsdiv = document.getElementsByClassName('t')[1].getBoundingClientRect();
-            drawing.strokeStyle = '#007FFF';
-            drawing.lineWidth = '0.7';
-            drawing.beginPath();
-            drawing.moveTo(coords.left + 35 + 39 * this.a, 100);
-            drawing.quadraticCurveTo(39 * this.a / 2, 0, coords.left + 35 + 39 * this.c, 100);
-            drawing.stroke();
-            canvasdiv.style.left = coords.left + coords.left + coordsdiv.bottom + 'px';
+            drawing = document.getElementsByTagName('canvas')[1].getContext('2d');
+            coords = document.querySelectorAll('.arrow')[1].getBoundingClientRect();
+            draw();
+            cdiv.style.left = ruler.left + 35 + 39 * this.a + 'px';
             break;
     };
 
-    return canvasdiv;
+    function draw() {
+            drawing.strokeStyle = '#EF3038';
+            drawing.lineWidth = '1.5';
+            drawing.beginPath();
+            drawing.moveTo(0, 100);
+            drawing.quadraticCurveTo(39 * segment / 2, 0, ruler.left + coords.bottom, 100);
+            drawing.stroke();
+    };
+
+    return cdiv;
 
 };
 
