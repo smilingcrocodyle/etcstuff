@@ -1,12 +1,4 @@
-/*
-Во избежания недопонимания по срокам:
-- основная часть программы (архитектура + solve + showLine) была доделана до 15.00 17.01;
-- однако, showConvex была не закончена (уже перед дедлайном там вскрылась проблема с HTML5 canvas), так что
-я отправила то, что было, а showConvex доделала днем позже (18.01);
-- тогда же (18.01) был добавлен readme.
-*/
-
-function Numbers(style = 'line' || 'convex') {
+function Numbers(style = 'line' || 'arrow') {
     let arrone = [6, 7, 8, 9], arrtwo = [11, 12, 13, 14];
     this.a = arrone[Math.floor(Math.random() * 4)];
     this.c = arrtwo[Math.floor(Math.random() * 4)];
@@ -28,11 +20,11 @@ Numbers.prototype.solve = function(number, span) {
     form.innerHTML = '<form><input name="inputfornumbers" maxlength="2" type="text" /></form>';
 
     if (Numbers.count == 0 || Numbers.count == 1) {
-        this.style == 'line' ? this.showLine(number).prepend(form) : this.showConvex(number).prepend(form); aim = form; }
+        this.style == 'line' ? this.showLine(number).prepend(form) : this.showArrow(number).prepend(form); aim = form; }
     else { span.style.display = 'inline-block'; span.innerHTML = ''; span.appendChild(form); aim = span; };
 
     form.onchange = (event = event || window.event) => {
-        if (event.target.value != number) { event.target.style.color = 'red'; span.style.backgroundColor = '#FFD700'; }
+        if (event.target.value != number) { event.target.style.color = 'red'; if (Numbers.count < 2) span.style.backgroundColor = '#FFD700'; }
         else {
             span.style.backgroundColor = 'white';
             event.target.style.color = 'black';
@@ -41,7 +33,26 @@ Numbers.prototype.solve = function(number, span) {
             Numbers.count++;
             Numbers.count == 1 ? this.solve(this.b, this.bnumber) : this.solve(this.c, this.result);
         };
-
+    };
+    //для тех, кто не кликает мышкой, а жмет Enter
+    form.onkeypress = (event = event || window.event) => {
+        if (event.keyCode == 13) {
+            if (event.target.value != number) {
+                event.target.style.color = 'red'; if (Numbers.count < 2) span.style.backgroundColor = '#FFD700'; }
+            else {
+                span.style.backgroundColor = 'white';
+                event.target.style.color = 'black';
+                aim.innerHTML = '';
+                aim.innerHTML = event.target.value;
+                //GH работает дальше и без этого, но FF отказывается; если еще какие-то браузеры грешат тем же, их
+                //надо добавить в список - или поискать более универсальное решение (м.б. через "утиную типизацию" что-то)
+                if (navigator.userAgent.search(/Firefox/) > 0) {
+                    Numbers.count++;
+                    Numbers.count == 1 ? this.solve(this.b, this.bnumber) : this.solve(this.c, this.result); };
+            };
+            //решение бага с перезагрузкой страницы при нажатии Enter (отмена отправки формы)
+            event.preventDefault();
+        };
     };
 
 };
@@ -67,7 +78,7 @@ Numbers.prototype.showLine = function(segment) {
     return idiv;
 };
 
-Numbers.prototype.showConvex = function(segment) {
+Numbers.prototype.showArrow = function(segment) {
 
     let coords, drawing, cdiv = document.createElement('div'), canvas = document.createElement('canvas'),
         ruler = document.getElementById('ruler').getBoundingClientRect();
@@ -79,7 +90,7 @@ Numbers.prototype.showConvex = function(segment) {
     cdiv.style.width = canvas.style.width = 39 * segment + 'px';
     cdiv.style.top = cdiv.style.left = 0 + 'px';
     cdiv.style.textAlign = 'center';
-    cdiv.style.fontSize = '20pt';
+    cdiv.style.fontSize = '24pt';
     cdiv.appendChild(canvas);
     document.querySelector('.main').appendChild(cdiv);
 
@@ -93,18 +104,31 @@ Numbers.prototype.showConvex = function(segment) {
         case 1:
             drawing = document.getElementsByTagName('canvas')[1].getContext('2d');
             coords = document.querySelectorAll('.arrow')[1].getBoundingClientRect();
-            draw();
+            draw(this.b);
             cdiv.style.left = ruler.left + 35 + 39 * this.a + 'px';
             break;
     };
 
-    function draw() {
+    function draw(n) {
             drawing.strokeStyle = '#EF3038';
             drawing.lineWidth = '4.5';
             drawing.lineCap = 'round';
             drawing.beginPath();
             drawing.moveTo(coords.left, coords.bottom);
             drawing.quadraticCurveTo(300 / 2, -30, 300, coords.bottom);
+            drawing.stroke();
+             if (n <= 3) {
+                drawing.moveTo(280, coords.bottom);
+                drawing.lineTo(300, coords.bottom);
+                drawing.moveTo(295, coords.bottom - 15);
+                drawing.lineTo(300, coords.bottom);
+            } else {
+                drawing.lineWidth = '3.0';
+                drawing.moveTo(290, coords.bottom);
+                drawing.lineTo(300, coords.bottom);
+                drawing.moveTo(295, coords.bottom - 10);
+                drawing.lineTo(300, coords.bottom);
+            };
             drawing.stroke();
             cdiv.style.top = ruler.top - 70 + 'px';
     };
@@ -113,4 +137,4 @@ Numbers.prototype.showConvex = function(segment) {
 
 };
 
-new Numbers('line');
+new Numbers('arrow');
