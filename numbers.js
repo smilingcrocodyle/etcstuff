@@ -23,35 +23,26 @@ Numbers.prototype.solve = function(number, span) {
         this.style == 'line' ? this.showLine(number).prepend(form) : this.showArrow(number).prepend(form); aim = form; }
     else { span.style.display = 'inline-block'; span.innerHTML = ''; span.appendChild(form); aim = span; };
 
-    form.onchange = (event = event || window.event) => {
-        if (event.target.value != number) { event.target.style.color = 'red'; if (Numbers.count < 2) span.style.backgroundColor = '#FFD700'; }
-        else {
+    form.onchange = changing.bind(this);
+    form.onkeypress = changing.bind(this); //для тех, кто не кликает мышкой, а жмет Enter
+
+    function changing(event) {
+        //решение бага с перезагрузкой страницы при нажатии Enter (отмена отправки формы)
+        if (event.keyCode == 13) event.preventDefault();
+        if (event.target.value == '' || (event.target.value < 10 && Numbers.count > 1)) return;
+        if (event.target.value != number) {
+            event.target.style.color = 'red';
+            if (Numbers.count < 2) span.style.backgroundColor = '#FFD700';
+        } else {
             span.style.backgroundColor = 'white';
             event.target.style.color = 'black';
             aim.innerHTML = '';
             aim.innerHTML = event.target.value;
-            Numbers.count++;
-            Numbers.count == 1 ? this.solve(this.b, this.bnumber) : this.solve(this.c, this.result);
-        };
-    };
-    //для тех, кто не кликает мышкой, а жмет Enter
-    form.onkeypress = (event = event || window.event) => {
-        if (event.keyCode == 13) {
-            if (event.target.value != number) {
-                event.target.style.color = 'red'; if (Numbers.count < 2) span.style.backgroundColor = '#FFD700'; }
-            else {
-                span.style.backgroundColor = 'white';
-                event.target.style.color = 'black';
-                aim.innerHTML = '';
-                aim.innerHTML = event.target.value;
-                //GH работает дальше и без этого, но FF отказывается; если еще какие-то браузеры грешат тем же, их
-                //надо добавить в список - или поискать более универсальное решение (м.б. через "утиную типизацию" что-то)
-                if (navigator.userAgent.search(/Firefox/) > 0) {
-                    Numbers.count++;
-                    Numbers.count == 1 ? this.solve(this.b, this.bnumber) : this.solve(this.c, this.result); };
-            };
-            //решение бага с перезагрузкой страницы при нажатии Enter (отмена отправки формы)
-            event.preventDefault();
+            //GH работает дальше и без этого, но FF отказывается; если еще какие-то браузеры грешат тем же, их
+            //надо добавить в список - или поискать более универсальное решение (м.б. через "утиную типизацию" что-то)
+            if (event.type == 'change' || navigator.userAgent.search(/Firefox/) > 0) {
+                Numbers.count++;
+                Numbers.count == 1 ? this.solve(this.b, this.bnumber) : this.solve(this.c, this.result); };
         };
     };
 
@@ -104,7 +95,7 @@ Numbers.prototype.showArrow = function(segment) {
         case 1:
             drawing = document.getElementsByTagName('canvas')[1].getContext('2d');
             coords = document.querySelectorAll('.arrow')[1].getBoundingClientRect();
-            draw(this.b);
+            draw(segment);
             cdiv.style.left = ruler.left + 35 + 39 * this.a + 'px';
             break;
     };
