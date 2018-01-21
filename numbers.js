@@ -29,10 +29,11 @@ Numbers.prototype.solve = function(number, span) {
     function changing(event) {
         //решение бага с перезагрузкой страницы при нажатии Enter (отмена отправки формы)
         if (event.keyCode == 13) event.preventDefault();
-        if (event.target.value == '' || (event.target.value < 10 && Numbers.count > 1)) return;
         if (event.target.value != number) {
-            event.target.style.color = 'red';
-            if (Numbers.count < 2) span.style.backgroundColor = '#FFD700';
+            if (event.target.value == '') return;
+            if (event.target.value < 10 && event.keyCode != 13) return;
+                event.target.style.color = 'red';
+                if (Numbers.count < 2) span.style.backgroundColor = '#FFD700';
         } else {
             span.style.backgroundColor = 'white';
             event.target.style.color = 'black';
